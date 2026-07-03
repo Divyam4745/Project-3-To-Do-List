@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern To-Do List</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .container {
+            width: 420px;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.2);
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .input-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            outline: none;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .add-btn {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+            transition: .3s;
+        }
+
+        .add-btn:hover {
+            background: #1f8a38;
+            transform: scale(1.05);
+        }
+
+        ul {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        li {
+            background: white;
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: .3s;
+        }
+
+        li:hover {
+            transform: translateX(5px);
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+            opacity: .7;
+        }
+
+        .actions button {
+            margin-left: 5px;
+            border: none;
+            cursor: pointer;
+            padding: 8px 10px;
+            border-radius: 8px;
+            color: white;
+            transition: .3s;
+        }
+
+        .done {
+            background: #007bff;
+        }
+
+        .delete {
+            background: #dc3545;
+        }
+
+        .done:hover {
+            background: #0056b3;
+        }
+
+        .delete:hover {
+            background: #b71c1c;
+        }
+
+        .clear {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #ff4d4d;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: .3s;
+        }
+
+        .clear:hover {
+            background: #cc0000;
+        }
+
+        .footer {
+            color: white;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>📝 To-Do List</h1>
+
+        <div class="input-box">
+            <input type="text" id="task" placeholder="Enter a new task...">
+            <button class="add-btn" onclick="addTask()">Add</button>
+        </div>
+
+        <ul id="list"></ul>
+
+        <button class="clear" onclick="clearAll()">Clear All</button>
+
+        <div class="footer">
+            Total Tasks:
+            <span id="count">0</span>
+        </div>
+
+    </div>
+
+    <script>
+
+        let tasks = [];
+
+        function displayTasks() {
+
+            let html = "";
+
+            tasks.forEach((task, index) => {
+
+                html += `
+            <li>
+
+                <span class="${task.completed ? "completed" : ""}">
+                    ${task.text}
+                </span>
+
+                <div class="actions">
+
+                    <button class="done"
+                    onclick="toggleTask(${index})">
+
+                    ${task.completed ? "Undo" : "Done"}
+
+                    </button>
+
+                    <button class="delete"
+                    onclick="removeTask(${index})">
+
+                    ❌
+
+                    </button>
+
+                </div>
+
+            </li>
+            `;
+
+            });
+
+            document.getElementById("list").innerHTML = html;
+
+            document.getElementById("count").innerText = tasks.length;
+        }
+
+        function addTask() {
+
+            let input = document.getElementById("task");
+
+            let text = input.value.trim();
+
+            if (text === "") return;
+
+            tasks.push({
+                text: text,
+                completed: false
+            });
+
+            input.value = "";
+
+            saveTasks();
+
+            displayTasks();
+
+        }
+
+        function removeTask(index) {
+
+            tasks.splice(index, 1);
+
+            saveTasks();
+
+            displayTasks();
+
+        }
+
+        function toggleTask(index) {
+
+            tasks[index].completed = !tasks[index].completed;
+
+            saveTasks();
+
+            displayTasks();
+
+        }
+
+        function clearAll() {
+
+            if (confirm("Delete all tasks?")) {
+
+                tasks = [];
+
+                saveTasks();
+
+                displayTasks();
+
+            }
+
+        }
+
+        function saveTasks() {
+
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+
+        }
+
+        function loadTasks() {
+
+            let saved = localStorage.getItem("tasks");
+
+            if (saved) {
+
+                tasks = JSON.parse(saved);
+
+            }
+
+        }
+
+        document.getElementById("task").addEventListener("keypress", function (e) {
+
+            if (e.key === "Enter") {
+
+                addTask();
+
+            }
+
+        });
+
+        loadTasks();
+
+        displayTasks();
+
+    </script>
+
+</body>
+
+</html>
